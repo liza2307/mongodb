@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>MONEY</title>
+    <link href="index.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="head">
+        <a href="http://localhost:3000/"><div class="incus">
+            <button>Клиенты</button>
+        </div></a>
+
+        <a href="http://localhost:3001/"><div class="inse">
+            <button>ЦБ</button>
+        </div></a>
+
+        <a href="http://localhost:3002/"><div class="inade">
+            <button>Депозит</button>
+        </div></a>
+
+        <a href="http://localhost:3003/"><div class="inkind">
+            <button class="insubj">Виды деятельности </button>
+        </div></a>
+
+        
+
+        <a href="http://localhost:3005/"><div class="inses">
+            <button>Инвестиция в цб</button>
+        </div></a>
+
+        <a href="http://localhost:3006/"><div class="indes">
+            <button>Инвестиция в депозит</button>
+        </div></a>
+
+        <a href="http://localhost:3007/"><div class="inqo">
+            <button>Котировка</button>
+        </div></a>
+    </div>
+    <h2>Депозит</h2>
+    <form name="userForm">
+        <input type="hidden" name="id" value="0" />
+        
+        <div class="form-group">
+            <label for="name">Bet :</label>
+            <input class="form-control" name="Bet" />
+        </div>
+        <div class="form-group">
+            <label for="name">Title:</label>
+            <input class="form-control" name="Title" />
+        </div>
+        <div class="form-group">
+            <label for="name">Period :</label>
+            <input class="form-control" name="Period" />
+        </div>
+        <div class="form-group">
+            <label for="name">Bank :</label>
+            <input class="form-control" name="Bank" />
+        </div>
+      
+        <div class="panel-body">
+            <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+            <a id="reset" class="btn btn-sm btn-primary">Сбросить</a>
+        </div>
+    </form>
+    <table class="table table-condensed table-striped table-bordered">
+        <thead><tr><th>Id</th><th>Bet </th><th>Title </th><th>Period </th><th>Bank </th><th></th></tr></thead>
+        <tbody>
+        </tbody>
+    </table>
+   
+    <script>
+    // Получение всех пользователей
+        async function GetUsers() {
+            // отправляет запрос и получаем ответ
+            const response = await fetch("/api/users", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            // если запрос прошел нормально
+            if (response.ok === true) {
+                // получаем данные
+                const users = await response.json();
+                let rows = document.querySelector("tbody"); 
+                users.forEach(user => {
+                    // добавляем полученные элементы в таблицу
+                    rows.append(row(user));
+                });
+            }
+        }
+        // Получение одного пользователя
+        async function GetUser(id) {
+            const response = await fetch("/api/users/" + id, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const user = await response.json();
+                const form = document.forms["userForm"];
+                form.elements["id"].value = user._id;
+                form.elements["Bet"].value = user.Bet;
+                form.elements["Title"].value = user.Title;
+                form.elements["Period"].value = user.Period;
+                form.elements["Bank"].value = user.Bank;
+
+            }
+        }
+        // Добавление пользователя
+        async function CreateUser(userBet,userTitle,userPeriod,userBank) {
+  
+            const response = await fetch("api/users", {
+                method: "POST",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    
+                    Bet: userBet,
+                    Title: userTitle,
+                    Period: userPeriod,
+                    Bank: userBank,
+
+                })
+            });
+            if (response.ok === true) {
+                const user = await response.json();
+                reset();
+                document.querySelector("tbody").append(row(user));
+            }
+        }
+
+        async function EditUser(userId, userBet,userTitle,userPeriod,userBank) {
+            const response = await fetch("api/users", {
+                method: "PUT",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: userId,
+                    Bet: userBet,
+                    Title: userTitle,
+                    Period: userPeriod,
+                    Bank: userBank,
+                })
+            });
+            if (response.ok === true) {
+                const user = await response.json();
+                reset();
+                document.querySelector("tr[data-rowid='" + user._id + "']").replaceWith(row(user));
+            }
+        }
+        // Удаление пользователя
+        async function DeleteUser(id) {
+            const response = await fetch("/api/users/" + id, {
+                method: "DELETE",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const user = await response.json();
+                document.querySelector("tr[data-rowid='" + user._id + "']").remove();
+            }
+        }
+  
+        // сброс формы
+        function reset() {
+            const form = document.forms["userForm"];
+            form.reset();
+            form.elements["id"].value = 0;
+        }
+        // создание строки для таблицы
+        function row(user) {
+  
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-rowid", user._id);
+  
+            const idTd = document.createElement("td");
+            idTd.append(user._id);
+            tr.append(idTd);
+  
+            
+
+           
+            const BetTd = document.createElement("td");
+            BetTd.append(user.Bet);
+            tr.append(BetTd);
+
+            const TitleTd = document.createElement("td");
+            TitleTd.append(user.Title);
+            tr.append(TitleTd);
+
+            const PeriodTd = document.createElement("td");
+            PeriodTd.append(user.Period);
+            tr.append(PeriodTd);
+
+            const BankTd = document.createElement("td");
+            BankTd.append(user.Bank);
+            tr.append(BankTd);
+
+            const linksTd = document.createElement("td");
+  
+            const editLink = document.createElement("a");
+            editLink.setAttribute("data-id", user._id);
+            editLink.setAttribute("style", "cursor:pointer;padding:15px;");
+            editLink.append("Изменить");
+            editLink.addEventListener("click", e => {
+  
+                e.preventDefault();
+                GetUser(user._id);
+            });
+            linksTd.append(editLink);
+  
+            const removeLink = document.createElement("a");
+            removeLink.setAttribute("data-id", user._id);
+            removeLink.setAttribute("style", "cursor:pointer;padding:15px;");
+            removeLink.append("Удалить");
+            removeLink.addEventListener("click", e => {
+  
+                e.preventDefault();
+                DeleteUser(user._id);
+            });
+  
+            linksTd.append(removeLink);
+            tr.appendChild(linksTd);
+  
+            return tr;
+        }
+        // сброс значений формы
+        document.getElementById("reset").click(function (e) {
+  
+            e.preventDefault();
+            reset();
+        })
+  
+        // отправка формы
+        document.forms["userForm"].addEventListener("submit", e => {
+            e.preventDefault();
+            const form = document.forms["userForm"];
+            const id = form.elements["id"].value;
+            const Bet= form.elements["Bet"].value;
+            const Title= form.elements["Title"].value;
+            const Period= form.elements["Period"].value;
+            const Bank= form.elements["Bank"].value;
+
+            if (id == 0)
+                CreateUser(Bet,Title,Period,Bank);
+            else
+                EditUser(id, Bet,Title,Period,Bank);
+        });
+  
+        // загрузка пользователей
+        GetUsers();
+    </script>
+</body>
+</html>
